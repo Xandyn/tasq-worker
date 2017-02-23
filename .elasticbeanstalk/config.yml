@@ -1,0 +1,13 @@
+branch-defaults:
+  master:
+    environment: tasq-worker-dev
+    group_suffix: null
+global:
+  application_name: tasq-worker
+  branch: null
+  default_ec2_keyname: null
+  default_platform: Python 3.4
+  default_region: us-west-2
+  profile: null
+  repository: null
+  sc: git
