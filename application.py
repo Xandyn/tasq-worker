@@ -11,7 +11,7 @@ from aiohttp import web
 from settings import *
 
 
-async def email_handler(request):
+async def sqs_handler(request):
     """
         handle emails
     """
@@ -48,7 +48,7 @@ def init():
     loop = asyncio.get_event_loop()
     application = web.Application(loop=loop)
     application.router.add_get('/', index)
-    application.router.add_post('/email', email_handler)
+    application.router.add_post('/', sqs_handler)
     return application
 
 
