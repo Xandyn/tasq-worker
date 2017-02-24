@@ -6,35 +6,43 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-# Core aiohttp imports
-import asyncio
-
-from aiohttp import web
+# Core Flask imports
+from flask import Flask, request, Response
 
 # Third-party app imports
 
 # Imports from your apps
-from settings import *
 
 
-@asyncio.coroutine
-def sqs_handler(request):
+application = Flask(__name__)
+application.config.from_object('settings')
+application.debug = application.config['DEBUG']
+
+
+@application.route('/', methods=['POST'])
+def sqs_handler():
     """
         handle emails
     """
-    message = yield from request.json()
+    message = request.get_json()
 
     if message is None:
-        return web.Response(text='', status=415)
+        return Response('', status=415)
 
     if message.get('subject', None):
-        s = smtplib.SMTP(MAIL_SERVER, MAIL_PORT)
+        s = smtplib.SMTP(
+            application.config['MAIL_SERVER'],
+            application.config['MAIL_PORT']
+        )
         s.starttls()
-        s.login(MAIL_USERNAME, MAIL_PASSWORD)
+        s.login(
+            application.config['MAIL_USERNAME'],
+            application.config['MAIL_PASSWORD']
+        )
 
         msg = MIMEMultipart('alternative')
         msg['Subject'] = message.get("subject")
-        msg['From'] = MAIL_DEFAULT_SENDER
+        msg['From'] = application.config['MAIL_DEFAULT_SENDER']
         msg['To'] = message.get("recipients")[0]
         part2 = MIMEText(message.get("html"), 'html')
         msg.attach(part2)
@@ -42,26 +50,10 @@ def sqs_handler(request):
         try:
             s.sendmail(msg['From'], msg['To'], msg.as_string())
         except smtplib.SMTPException:
-            return web.Response(text='Not send', status=403)
+            return Response('Not send', status=403)
 
-    return web.Response(text='Ok')
-
-
-@asyncio.coroutine
-def index(request):
-    return web.Response(text='Ok')
-
-
-def init():
-    loop = asyncio.get_event_loop()
-    app = web.Application(loop=loop)
-    app.router.add_get('/', index)
-    app.router.add_post('/', sqs_handler)
-    return app
-
-
-application = init()
+    return Response('Ok')
 
 
 if __name__ == '__main__':
-    web.run_app(application)
+    application.run(host='0.0.0.0')
