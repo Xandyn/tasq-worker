@@ -1,21 +1,28 @@
 # -*- coding: utf-8 -*-
+
+# Stdlib imports
 import smtplib
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+# Core aiohttp imports
 import asyncio
 
 from aiohttp import web
 
+# Third-party app imports
+
+# Imports from your apps
 from settings import *
 
 
-async def sqs_handler(request):
+@asyncio.coroutine
+def sqs_handler(request):
     """
         handle emails
     """
-    message = await request.json()
+    message = yield from request.json()
 
     if message is None:
         return web.Response(text='', status=415)
@@ -40,7 +47,8 @@ async def sqs_handler(request):
     return web.Response(text='Ok')
 
 
-async def index(request):
+@asyncio.coroutine
+def index(request):
     return web.Response(text='Ok')
 
 
