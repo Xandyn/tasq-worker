@@ -54,14 +54,14 @@ def index(request):
 
 def init():
     loop = asyncio.get_event_loop()
-    application = web.Application(loop=loop)
-    application.router.add_get('/', index)
-    application.router.add_post('/', sqs_handler)
-    return application
+    app = web.Application(loop=loop)
+    app.router.add_get('/', index)
+    app.router.add_post('/', sqs_handler)
+    return app
 
 
-app = init()
+application = init()
 
 
 if __name__ == '__main__':
-    web.run_app(app)
+    web.run_app(application)
